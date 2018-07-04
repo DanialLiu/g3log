@@ -37,6 +37,9 @@ namespace g3 {
       std::string file() const {
          return _file;
       }
+      std::string tag() const {
+         return _tag;
+      }
       std::string line() const {
          return std::to_string(_line);
       }
@@ -75,7 +78,7 @@ namespace g3 {
       LogMessage& operator=(LogMessage other);
 
 
-      LogMessage(std::string file, const int line, std::string function, const LEVELS level);
+      LogMessage(std::string tag, std::string file, const int line, std::string function, const LEVELS level);
 
       explicit LogMessage(const std::string& fatalOsSignalCrashMessage);
       LogMessage(const LogMessage& other);
@@ -116,6 +119,7 @@ namespace g3 {
       mutable LogDetailsFunc _logDetailsToStringFunc;
       g3::high_resolution_time_point _timestamp;
       std::thread::id _call_thread_id;
+      std::string _tag;
       std::string _file;
       std::string _file_path;
       int _line;
@@ -130,6 +134,7 @@ namespace g3 {
          using std::swap;
          swap(first._timestamp, second._timestamp);
          swap(first._call_thread_id, second._call_thread_id);
+         swap(first._tag, second._tag);
          swap(first._file, second._file);
          swap(first._line, second._line);
          swap(first._function, second._function);

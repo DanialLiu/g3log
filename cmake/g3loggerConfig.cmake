@@ -40,6 +40,7 @@ find_path(G3LOG_INCLUDE_DIR
          g3log/stacktrace_windows.hpp
          g3log/stlpatch_future.hpp
          g3log/time.hpp
+         g3log/log.h
 )
 
 find_library(G3LOG_LIBRARY

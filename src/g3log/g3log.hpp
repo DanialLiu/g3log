@@ -104,7 +104,7 @@ namespace g3 {
       bool isLoggingInitialized();
 
       // Save the created LogMessage to any existing sinks
-      void saveMessage(const char *message, const char *file, int line, const char *function, const LEVELS &level,
+      void saveMessage(const char *message, const char *tag, const char *file, int line, const char *function, const LEVELS &level,
                        const char *boolean_expression, int fatal_signal, const char *stack_trace);
 
       // forwards the message to all sinks
@@ -138,26 +138,32 @@ namespace g3 {
    } // internal
 } // g3
 
-#define INTERNAL_LOG_MESSAGE(level) LogCapture(__FILE__, __LINE__, static_cast<const char*>(__PRETTY_FUNCTION__), level)
+#define INTERNAL_LOG_MESSAGE(level, tag) LogCapture(tag, __FILE__, __LINE__, static_cast<const char*>(__PRETTY_FUNCTION__), level)
 
-#define INTERNAL_CONTRACT_MESSAGE(boolean_expression)  \
-   LogCapture(__FILE__, __LINE__, __PRETTY_FUNCTION__, g3::internal::CONTRACT, boolean_expression)
+#define INTERNAL_CONTRACT_MESSAGE(boolean_expression, tag)  \
+   LogCapture(tag, __FILE__, __LINE__, __PRETTY_FUNCTION__, g3::internal::CONTRACT, boolean_expression)
 
 
 // LOG(level) is the API for the stream log
-#define LOG(level) if(!g3::logLevel(level)){ } else INTERNAL_LOG_MESSAGE(level).stream()
+#define LOG(level, tag) if(!g3::logLevel(level)){ } else INTERNAL_LOG_MESSAGE(level, tag).stream()
 
+#define LOGV(tag) LOG(VERBOSE, tag)
+#define LOGD(tag) LOG(DEBUG, tag)
+#define LOGI(tag) LOG(INFO, tag)
+#define LOGW(tag) LOG(WARNING, tag)
+#define LOGE(tag) LOG(ERROR, tag)
+#define LOGF(tag) LOG(FATAL, tag)
 
 // 'Conditional' stream log
-#define LOG_IF(level, boolean_expression)  \
+#define LOG_IF(level, tag, boolean_expression)  \
    if(true == (boolean_expression))  \
-      if(g3::logLevel(level))  INTERNAL_LOG_MESSAGE(level).stream()
+      if(g3::logLevel(level))  INTERNAL_LOG_MESSAGE(level, tag).stream()
 
 // 'Design By Contract' stream API. For Broken Contracts:
 //         unit testing: it will throw std::runtime_error when a contract breaks
 //         I.R.L : it will exit the application by using fatal signal SIGABRT
-#define CHECK(boolean_expression)        \
-   if (false == (boolean_expression))  INTERNAL_CONTRACT_MESSAGE(#boolean_expression).stream()
+#define CHECK(boolean_expression, tag)        \
+   if (false == (boolean_expression))  INTERNAL_CONTRACT_MESSAGE(#boolean_expression, tag).stream()
 
 
 /** For details please see this
@@ -208,23 +214,30 @@ And here is possible output
 :      floats: 3.14 +3e+000 3.141600E+000
 :      Width trick:    10
 :      A string  \endverbatim */
-#define LOGF(level, printf_like_message, ...)                 \
-   if(!g3::logLevel(level)){ } else INTERNAL_LOG_MESSAGE(level).capturef(printf_like_message, ##__VA_ARGS__)
+#define _LOGF(level, tag, printf_like_message, ...)                 \
+   if(!g3::logLevel(level)){ } else INTERNAL_LOG_MESSAGE(level, tag).capturef(printf_like_message, ##__VA_ARGS__)
+
+#define LOGVF(tag, printf_like_message, ...) _LOGF(VERBOSE, tag, printf_like_message, ##__VA_ARGS__)
+#define LOGDF(tag, printf_like_message, ...) _LOGF(DEBUG, tag, printf_like_message, ##__VA_ARGS__)
+#define LOGIF(tag, printf_like_message, ...) _LOGF(INFO, tag, printf_like_message, ##__VA_ARGS__)
+#define LOGWF(tag, printf_like_message, ...) _LOGF(WARNING, tag, printf_like_message, ##__VA_ARGS__)
+#define LOGEF(tag, printf_like_message, ...) _LOGF(ERROR, tag, printf_like_message, ##__VA_ARGS__)
+#define LOGFF(tag, printf_like_message, ...) _LOGF(FATAL, tag, printf_like_message, ##__VA_ARGS__)
 
 // Conditional log printf syntax
-#define LOGF_IF(level,boolean_expression, printf_like_message, ...) \
+#define LOGF_IF(level, tag, boolean_expression, printf_like_message, ...) \
    if(true == (boolean_expression))                                     \
-      if(g3::logLevel(level))  INTERNAL_LOG_MESSAGE(level).capturef(printf_like_message, ##__VA_ARGS__)
+      if(g3::logLevel(level))  INTERNAL_LOG_MESSAGE(level, tag).capturef(printf_like_message, ##__VA_ARGS__)
 
 // Design By Contract, printf-like API syntax with variadic input parameters.
 // Throws std::runtime_eror if contract breaks
-#define CHECKF(boolean_expression, printf_like_message, ...)    \
-   if (false == (boolean_expression))  INTERNAL_CONTRACT_MESSAGE(#boolean_expression).capturef(printf_like_message, ##__VA_ARGS__)
+#define CHECKF(boolean_expression, tag, printf_like_message, ...)    \
+   if (false == (boolean_expression))  INTERNAL_CONTRACT_MESSAGE(#boolean_expression, tag).capturef(printf_like_message, ##__VA_ARGS__)
 
 // Backwards compatible. The same as CHECKF. 
 // Design By Contract, printf-like API syntax with variadic input parameters.
 // Throws std::runtime_eror if contract breaks
-#define CHECK_F(boolean_expression, printf_like_message, ...)    \
-   if (false == (boolean_expression))  INTERNAL_CONTRACT_MESSAGE(#boolean_expression).capturef(printf_like_message, ##__VA_ARGS__)
+#define CHECK_F(boolean_expression, tag, printf_like_message, ...)    \
+   if (false == (boolean_expression))  INTERNAL_CONTRACT_MESSAGE(#boolean_expression, tag).capturef(printf_like_message, ##__VA_ARGS__)
 
 

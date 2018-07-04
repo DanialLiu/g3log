@@ -36,7 +36,7 @@ struct LogCapture {
     * @expression for CHECK calls
     * @fatal_signal for failed CHECK:SIGABRT or fatal signal caught in the signal handler
     */
-   LogCapture(const char *file, const int line, const char *function, const LEVELS &level, const char *expression = "", g3::SignalType fatal_signal = SIGABRT, const char *dump = nullptr);
+   LogCapture(const char* tag, const char *file, const int line, const char *function, const LEVELS &level, const char *expression = "", g3::SignalType fatal_signal = SIGABRT, const char *dump = nullptr);
 
 
    // At destruction the message will be forwarded to the g3log worker.
@@ -73,6 +73,7 @@ struct LogCapture {
 
    std::ostringstream _stream;
    std::string _stack_trace;
+   const char* _tag;
    const char* _file;
    const int _line;
    const char* _function;

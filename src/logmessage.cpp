@@ -63,27 +63,31 @@ namespace g3 {
    // helper for setting the normal log details in an entry
    std::string LogMessage::DefaultLogDetailsToString(const LogMessage& msg) {
       std::string out;
-      out.append(msg.timestamp() + "\t"
+      out.append(msg.timestamp() + " "
                  + msg.level() 
-                 + " [" 
+                 + "/"
+                 + msg.tag()
+                 + "[" 
                  + msg.file() 
                  + "->" 
                  + msg.function() 
-                 + ":" + msg.line() + "]\t");
+                 + ":" + msg.line() + "]: ");
       return out;
    }
 
 
    std::string LogMessage::FullLogDetailsToString(const LogMessage& msg) {
       std::string out;
-      out.append(msg.timestamp() + "\t"
+      out.append(msg.timestamp() + " "
                  + msg.level() 
-                 + " [" 
+                 + "/"
+                 + msg.tag()
+                 + "[" 
                  + msg.threadID() 
                  + " "
                  + msg.file() 
                  + "->"+ msg.function() 
-                 + ":" + msg.line() + "]\t");
+                 + ":" + msg.line() + "]: ");
       return out;
    }
 
@@ -152,11 +156,12 @@ namespace g3 {
    }
 
 
-   LogMessage::LogMessage(std::string file, const int line,
+   LogMessage::LogMessage(std::string tag, std::string file, const int line,
                           std::string function, const LEVELS level)
       : _logDetailsToStringFunc(LogMessage::DefaultLogDetailsToString)
       , _timestamp(std::chrono::high_resolution_clock::now())
       , _call_thread_id(std::this_thread::get_id())
+      , _tag(tag)
       , _file(LogMessage::splitFileName(file))
 #if defined(G3_LOG_FULL_FILENAME)
       , _file(file)
@@ -169,7 +174,7 @@ namespace g3 {
 
 
    LogMessage::LogMessage(const std::string& fatalOsSignalCrashMessage)
-      : LogMessage( {""}, 0, {""}, internal::FATAL_SIGNAL) {
+      : LogMessage({""}, {""}, 0, {""}, internal::FATAL_SIGNAL) {
       _message.append(fatalOsSignalCrashMessage);
    }
 
@@ -177,6 +182,7 @@ namespace g3 {
       : _logDetailsToStringFunc(other._logDetailsToStringFunc)
       , _timestamp(other._timestamp)
       , _call_thread_id(other._call_thread_id)
+      , _tag(other._tag)
       , _file(other._file)
       , _file_path(other._file_path)
       , _line(other._line)
@@ -190,6 +196,7 @@ namespace g3 {
       : _logDetailsToStringFunc(other._logDetailsToStringFunc)
       , _timestamp(other._timestamp)
       , _call_thread_id(other._call_thread_id)
+      , _tag(std::move(other._tag))
       , _file(std::move(other._file))
       , _file_path(std::move(other._file_path))
       , _line(other._line)

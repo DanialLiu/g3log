@@ -140,7 +140,7 @@ namespace g3 {
        */
       bool shutDownLoggingForActiveOnly(LogWorker* active) {
          if (isLoggingInitialized() && nullptr != active && (active != g_logger_instance)) {
-            LOG(WARNING) << "\n\t\tAttempted to shut down logging, but the ID of the Logger is not the one that is active."
+            LOG(WARNING, "g3log") << "\n\t\tAttempted to shut down logging, but the ID of the Logger is not the one that is active."
                          << "\n\t\tHaving multiple instances of the g3::LogWorker is likely a BUG"
                          << "\n\t\tEither way, this call to shutDownLogging was ignored"
                          << "\n\t\tTry g3::internal::shutDownLogging() instead";
@@ -155,10 +155,10 @@ namespace g3 {
 
       /** explicits copy of all input. This is makes it possibly to use g3log across dynamically loaded libraries
       * i.e. (dlopen + dlsym)  */
-      void saveMessage(const char* entry, const char* file, int line, const char* function, const LEVELS& level,
+      void saveMessage(const char* entry, const char* tag, const char* file, int line, const char* function, const LEVELS& level,
                        const char* boolean_expression, int fatal_signal, const char* stack_trace) {
          LEVELS msgLevel {level};
-         LogMessagePtr message {std::make_unique<LogMessage>(file, line, function, msgLevel)};
+         LogMessagePtr message {std::make_unique<LogMessage>(tag, file, line, function, msgLevel)};
          message.get()->write().append(entry);
          message.get()->setExpression(boolean_expression);
 
